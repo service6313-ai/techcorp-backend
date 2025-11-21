@@ -21,12 +21,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.51.1_Linux-64bit.deb
-          sudo dpkg -i trivy_0.51.1_Linux-64bit.deb
+      - name: Load Docker image from build job (rebuild)
+        run: docker build -t techcorp/backend:latest .
 
-      - name: Scan Image with Trivy
-        run: trivy image techcorp/backend:latest
+      - name: Run Trivy scan on Docker image
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: 'techcorp/backend:latest'
+          format: 'table'
+          vuln-type: 'os,library'
+          severity: 'HIGH,CRITICAL'
